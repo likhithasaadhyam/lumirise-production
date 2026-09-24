@@ -118,7 +118,7 @@ export function DataTable<T extends { id?: string | number }>({
       </div>
 
       {/* Table Container */}
-      <div className="overflow-x-auto min-h-[300px]">
+      <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse text-xs">
           <thead>
             <tr className="bg-slate-50/90 border-b border-slate-200 text-slate-600 font-semibold uppercase tracking-wider">

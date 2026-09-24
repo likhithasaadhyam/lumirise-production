@@ -17,15 +17,53 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-const ALLOWED_ORIGINS = (process.env.CORS_ORIGIN || 'http://localhost:5173')
-  .split(',')
-  .map((o) => o.trim());
+const DEFAULT_ALLOWED_ORIGINS = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:5174',
+  'http://127.0.0.1:5174',
+  'http://localhost:4173',
+  'http://127.0.0.1:4173',
+];
+
+const ALLOWED_ORIGINS = Array.from(
+  new Set([
+    ...DEFAULT_ALLOWED_ORIGINS,
+    ...(process.env.CORS_ORIGIN || '').split(',').map((o) => o.trim()).filter(Boolean),
+  ])
+);
+
+const isAllowedOrigin = (origin: string) => {
+  if (!origin) return true;
+
+  const normalizedOrigin = origin.replace(/\/$/, '');
+  if (ALLOWED_ORIGINS.includes(normalizedOrigin)) return true;
+
+  try {
+    const { protocol, hostname, port } = new URL(normalizedOrigin);
+    const localHosts = new Set(['localhost', '127.0.0.1', '[::1]']);
+    const devPorts = new Set(['5173', '5174', '4173', '3000', '8080']);
+    const allowedProductionHosts = ['.vercel.app', '.netlify.app'];
+
+    const isTrustedProductionHost = allowedProductionHosts.some((suffix) => hostname.endsWith(suffix));
+
+    return (
+      (protocol === 'http:' || protocol === 'https:') &&
+      (
+        (localHosts.has(hostname) && (port === '' || devPorts.has(port))) ||
+        isTrustedProductionHost
+      )
+    );
+  } catch {
+    return false;
+  }
+};
 
 app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (e.g. server-to-server, Postman)
     if (!origin) return callback(null, true);
-    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+    if (isAllowedOrigin(origin)) return callback(null, true);
     return callback(new Error(`CORS: origin ${origin} not allowed`));
   },
   credentials: true,

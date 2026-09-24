@@ -26,10 +26,15 @@ class ApiClient {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      ...options,
-      headers,
-    });
+    let response: Response;
+    try {
+      response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        ...options,
+        headers,
+      });
+    } catch (error) {
+      throw new Error('Unable to reach the Lumirise API. Please check that the backend server is running.');
+    }
 
     if (response.status === 401 && !endpoint.includes('/auth/sign-in') && !endpoint.includes('/auth/sign-up')) {
       // Unauthorized: token might be expired
@@ -75,6 +80,20 @@ class ApiClient {
     });
     if (res.token) this.setToken(res.token);
     return res;
+  }
+
+  async requestPasswordReset(email: string) {
+    return this.request<any>('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  }
+
+  async resetPassword(email: string, token: string, newPassword: string) {
+    return this.request<any>('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ email, token, newPassword }),
+    });
   }
 
   // ===================== MANUFACTURING =====================

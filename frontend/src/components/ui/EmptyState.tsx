@@ -15,7 +15,7 @@ export function EmptyState({
   action,
 }: EmptyStateProps) {
   return (
-    <div className="text-center py-10 px-4 max-w-sm mx-auto">
+    <div className="text-center py-8 px-4 max-w-sm mx-auto">
       <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 text-slate-400 flex items-center justify-center mx-auto mb-3">
         {icon || <PackageOpen className="w-6 h-6" />}
       </div>

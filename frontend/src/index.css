@@ -4,9 +4,26 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --color-bg: #f7f8fa;
+  --color-surface: #ffffff;
+  --color-text: #111827;
+  --color-secondary: #667085;
+  --color-border: #e5e7eb;
+  --color-muted: #f2f4f7;
+  --color-primary: #2563eb;
+  --color-success: #16a34a;
+  --color-warning: #f59e0b;
+  --color-danger: #dc2626;
+  --color-info: #3b82f6;
+  --color-neutral: #64748b;
+}
+
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-900 antialiased selection:bg-brand-500 selection:text-white;
+    @apply antialiased selection:bg-brand-500 selection:text-white;
+    background-color: var(--color-bg);
+    color: var(--color-text);
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }

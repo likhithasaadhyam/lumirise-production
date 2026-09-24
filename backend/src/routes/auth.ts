@@ -7,9 +7,16 @@ import { recordAuditLog } from '../utils/audit.js';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET;
+const passwordResetTokens = new Map<string, { email: string; expiresAt: number }>();
 if (!JWT_SECRET) {
   throw new Error('FATAL: JWT_SECRET environment variable is not set. Refusing to start.');
 }
+
+const createResetToken = (email: string) => {
+  const token = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  passwordResetTokens.set(token, { email, expiresAt: Date.now() + 15 * 60 * 1000 });
+  return token;
+};
 
 // Sign In
 router.post('/sign-in', async (req: Request, res: Response) => {
@@ -277,6 +284,81 @@ router.post('/sign-up', async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     return res.status(500).json({ message: 'Failed to create workspace: ' + error.message });
+  }
+});
+
+// Request password reset code
+router.post('/forgot-password', async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body ?? {};
+    const normalizedEmail = String(email || '').trim().toLowerCase();
+
+    if (!normalizedEmail) {
+      return res.status(400).json({ message: 'A valid email address is required.' });
+    }
+
+    const user = await prisma.user.findFirst({
+      where: { email: normalizedEmail },
+      select: { id: true, email: true },
+    });
+
+    if (!user) {
+      return res.json({
+        message: 'If that account exists, a password reset code has been generated for the next step.',
+      });
+    }
+
+    const token = createResetToken(user.email);
+
+    return res.json({
+      message: 'If that account exists, a password reset code has been generated for the next step.',
+      resetToken: process.env.NODE_ENV !== 'production' ? token : undefined,
+      expiresInMinutes: 15,
+    });
+  } catch (error: any) {
+    return res.status(500).json({ message: 'Unable to process password reset request: ' + error.message });
+  }
+});
+
+router.post('/reset-password', async (req: Request, res: Response) => {
+  try {
+    const { email, token, newPassword } = req.body ?? {};
+    const normalizedEmail = String(email || '').trim().toLowerCase();
+    const normalizedToken = String(token || '').trim();
+    const nextPassword = String(newPassword || '').trim();
+
+    if (!normalizedEmail || !normalizedToken || !nextPassword) {
+      return res.status(400).json({ message: 'Email, reset code, and a new password are required.' });
+    }
+
+    if (nextPassword.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters long.' });
+    }
+
+    const tokenEntry = passwordResetTokens.get(normalizedToken);
+    if (!tokenEntry || tokenEntry.email !== normalizedEmail || tokenEntry.expiresAt < Date.now()) {
+      passwordResetTokens.delete(normalizedToken);
+      return res.status(400).json({ message: 'Invalid or expired reset code.' });
+    }
+
+    const user = await prisma.user.findFirst({ where: { email: normalizedEmail } });
+    if (!user) {
+      return res.status(404).json({ message: 'No account matched that reset request.' });
+    }
+
+    const passwordHash = await bcrypt.hash(nextPassword, 10);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash },
+    });
+
+    passwordResetTokens.delete(normalizedToken);
+
+    return res.json({
+      message: 'Password updated successfully. You can sign in with your new password.',
+    });
+  } catch (error: any) {
+    return res.status(500).json({ message: 'Unable to update password: ' + error.message });
   }
 });
 

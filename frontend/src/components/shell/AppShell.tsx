@@ -25,13 +25,13 @@ export function AppShell() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col antialiased">
-      <div className="flex-1 flex w-full">
+    <div className="h-screen bg-[var(--color-bg)] flex flex-col antialiased overflow-hidden">
+      <div className="flex flex-1 w-full min-h-0">
         {/* Sidebar */}
         <Sidebar isMobileOpen={isMobileOpen} setIsMobileOpen={setIsMobileOpen} />
 
         {/* Main Workspace Layout */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 min-h-0">
           <Topbar
             onOpenSearch={() => setIsSearchOpen(true)}
             onOpenNotifications={() => setIsNotificationsOpen(true)}
@@ -40,7 +40,7 @@ export function AppShell() {
             unreadCount={unreadCount}
           />
 
-          <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
             <Outlet />
           </main>
         </div>

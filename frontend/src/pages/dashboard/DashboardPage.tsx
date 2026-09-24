@@ -343,7 +343,7 @@ export function DashboardPage() {
                       {order.orderNumber}
                     </td>
                     <td className="px-4 py-3 text-slate-800 font-semibold">
-                      {order.product?.name || 'Aerospace Component'}
+                      {order.product?.name || '—'}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
@@ -467,7 +467,7 @@ export function DashboardPage() {
                       {new Date(entry.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </td>
                     <td className="px-4 py-3 text-slate-800 font-semibold">
-                      {entry.rawMaterial?.name || entry.product?.name || 'Alloy Stock'}
+                      {entry.rawMaterial?.name || entry.product?.name || '—'}
                     </td>
                     <td className="px-4 py-3">
                       <span
@@ -483,8 +483,8 @@ export function DashboardPage() {
                     <td className="px-4 py-3 font-mono font-bold">
                       {entry.type === 'IN' ? `+${entry.quantity}` : `-${entry.quantity}`}
                     </td>
-                    <td className="px-4 py-3 text-slate-600">{entry.warehouse?.name || 'Main Depot'}</td>
-                    <td className="px-4 py-3 font-mono text-slate-400">{entry.reference || 'PO-REC'}</td>
+                    <td className="px-4 py-3 text-slate-600">{entry.warehouse?.name || '—'}</td>
+                    <td className="px-4 py-3 font-mono text-slate-400">{entry.reference || '—'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -697,7 +697,7 @@ export function DashboardPage() {
                       {inv.invoiceNumber}
                     </td>
                     <td className="px-4 py-3 font-semibold text-slate-800">
-                      {inv.customer?.name || 'Aerospace Client'}
+                      {inv.customer?.name || '—'}
                     </td>
                     <td className="px-4 py-3 text-slate-500">{inv.dueDate}</td>
                     <td className="px-4 py-3 font-mono font-bold text-slate-900">
@@ -939,22 +939,28 @@ export function DashboardPage() {
             </Button>
           </div>
           <div className="divide-y divide-slate-100">
-            {productionOrders.map((order) => (
-              <div key={order.id} className="p-3.5 flex items-center justify-between text-xs">
-                <div>
-                  <span className="font-mono font-bold text-brand-600">{order.orderNumber}</span>
-                  <p className="font-semibold text-slate-800 mt-0.5">{order.product?.name || 'Part'}</p>
-                </div>
-                <div className="text-right">
-                  <span className="font-mono text-slate-700">
-                    {order.completedQuantity} / {order.targetQuantity}
-                  </span>
-                  <div className="mt-1">
-                    <StatusBadge status={order.status} />
+            {productionOrders.length === 0 ? (
+              <div className="p-6 text-center text-xs text-slate-500">
+                No active production orders.
+              </div>
+            ) : (
+              productionOrders.map((order) => (
+                <div key={order.id} className="p-3.5 flex items-center justify-between text-xs">
+                  <div>
+                    <span className="font-mono font-bold text-brand-600">{order.orderNumber}</span>
+                    <p className="font-semibold text-slate-800 mt-0.5">{order.product?.name || '—'}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-mono text-slate-700">
+                      {order.completedQuantity} / {order.targetQuantity}
+                    </span>
+                    <div className="mt-1">
+                      <StatusBadge status={order.status} />
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </Card>
 
@@ -970,26 +976,32 @@ export function DashboardPage() {
             </Button>
           </div>
           <div className="divide-y divide-slate-100">
-            {recentLedger.map((entry) => (
-              <div key={entry.id} className="p-3.5 flex items-center justify-between text-xs">
-                <div>
-                  <p className="font-semibold text-slate-800">
-                    {entry.rawMaterial?.name || entry.product?.name || 'Item'}
-                  </p>
-                  <p className="text-[10px] text-slate-400 font-mono">{entry.reference || 'PO'}</p>
-                </div>
-                <div className="text-right">
-                  <span
-                    className={`font-mono font-bold ${
-                      entry.type === 'IN' ? 'text-emerald-600' : 'text-amber-600'
-                    }`}
-                  >
-                    {entry.type === 'IN' ? `+${entry.quantity}` : `-${entry.quantity}`}
-                  </span>
-                  <p className="text-[10px] text-slate-500">{entry.warehouse?.name || 'Depot'}</p>
-                </div>
+            {recentLedger.length === 0 ? (
+              <div className="p-6 text-center text-xs text-slate-500">
+                No inventory movements yet.
               </div>
-            ))}
+            ) : (
+              recentLedger.map((entry) => (
+                <div key={entry.id} className="p-3.5 flex items-center justify-between text-xs">
+                  <div>
+                    <p className="font-semibold text-slate-800">
+                      {entry.rawMaterial?.name || entry.product?.name || '—'}
+                    </p>
+                    <p className="text-[10px] text-slate-400 font-mono">{entry.reference || '—'}</p>
+                  </div>
+                  <div className="text-right">
+                    <span
+                      className={`font-mono font-bold ${
+                        entry.type === 'IN' ? 'text-emerald-600' : 'text-amber-600'
+                      }`}
+                    >
+                      {entry.type === 'IN' ? `+${entry.quantity}` : `-${entry.quantity}`}
+                    </span>
+                    <p className="text-[10px] text-slate-500">{entry.warehouse?.name || '—'}</p>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </Card>
       </div>
