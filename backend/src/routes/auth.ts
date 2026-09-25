@@ -89,6 +89,7 @@ router.post('/sign-in', async (req: Request, res: Response) => {
       token,
       user: {
         id: user.id,
+        organizationId: user.organizationId,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
@@ -387,11 +388,13 @@ router.get('/me', authenticate, async (req: Request, res: Response) => {
     return res.json({
       user: {
         id: user.id,
+        organizationId: user.organizationId,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
         roleId: user.roleId,
         roleName: user.role.name,
+        role: user.role,
         employeeId: user.employeeId,
         avatar: user.avatar,
         status: user.status,
