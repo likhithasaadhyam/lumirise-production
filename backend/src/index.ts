@@ -1,6 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { prisma } from './db.js';
 import authRoutes from './routes/auth.js';
 import manufacturingRoutes from './routes/manufacturing.js';
 import inventoryRoutes from './routes/inventory.js';
@@ -77,8 +78,13 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 });
 
 // Health check
-app.get('/health', (_req: Request, res: Response) => {
-  res.json({ status: 'ok', platform: 'Lumirise ERP Core API', version: '1.0.0' });
+app.get('/health', async (_req: Request, res: Response) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({ status: 'ok', db: 'connected', platform: 'Lumirise ERP Core API', version: '1.0.0' });
+  } catch (err: any) {
+    res.status(500).json({ status: 'error', db: 'disconnected', error: err.message, platform: 'Lumirise ERP Core API', version: '1.0.0' });
+  }
 });
 
 // Domain Routes

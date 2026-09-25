@@ -111,7 +111,10 @@ router.post('/sign-in', async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error('Sign-in error:', error);
-    return res.status(500).json({ message: 'Server error during sign-in.' });
+    return res.status(500).json({ 
+      message: 'Server error during sign-in.',
+      detail: error?.message || 'Database connection or query failed'
+    });
   }
 });
 
